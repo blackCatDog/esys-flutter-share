@@ -16,6 +16,9 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
+import androidx.annotation.NonNull;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+
 
 /**
  * EsysFlutterSharePlugin
@@ -29,10 +32,31 @@ public class EsysFlutterSharePlugin implements MethodCallHandler {
         this._registrar = registrar;
     }
 
+
+
+    @Override
+    public void  onAttachedToEngine(FlutterPluginBinding binding) {
+        onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
+    }
+
+    private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
+        context = applicationContext;
+        methodChannel = new MethodChannel(messenger, "channel:github.com/orgs/esysberlin/esys-flutter-share");
+        methodChannel.setMethodCallHandler(this);
+    }
+
+    @Override
+    public void onDetachedFromEngine(FlutterPluginBinding binding) {
+        context = null;
+        methodChannel.setMethodCallHandler(null);
+        methodChannel = null;
+    }
     /**
      * Plugin registration.
      */
     public static void registerWith(Registrar registrar) {
+        com.example.fluttershare.FlutterSharePlugin instance = new com.example.fluttershare.FlutterSharePlugin();
+        instance.onAttachedToEngine(registrar.context(), registrar.messenger());
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "channel:github.com/orgs/esysberlin/esys-flutter-share");
         channel.setMethodCallHandler(new EsysFlutterSharePlugin(registrar));
     }
